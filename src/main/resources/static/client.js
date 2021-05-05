@@ -121,14 +121,18 @@ function sendMessage() {
 //    dataChannel.send(input.value);
 //    input.value = "";
 
-  var msg= input.value
+  var msg = input.value
+  console.log("message from Sender" , msg)
+  console.log("Sender state" , dataChannel.readyState)
  switch(dataChannel.readyState) {
     case "connecting":
       console.log("Connection not open; queueing: " + msg);
       sendQueue.push(msg);
       break;
     case "open":
-      sendQueue.forEach((msg) => dataChannel.send(msg));
+      //sendQueue.forEach((msg) => {
+       dataChannel.send(msg)
+      //};
       break;
     case "closing":
       console.log("Attempted to send message while closing: " + msg);
