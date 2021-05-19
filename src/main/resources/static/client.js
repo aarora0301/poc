@@ -6,6 +6,7 @@ var sendQueue = [];
 conn.onopen = function() {
     console.log("Connected to the signaling server");
     initialize();
+    navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
 };
 
 conn.onmessage = function(msg) {
@@ -77,6 +78,12 @@ function initialize() {
   	peerConnection.ondatachannel = function (event) {
         dataChannel = event.channel;
   	};
+
+
+  	peerConnection.onaddstream = function(event) {
+  	console.log("audio received")
+        audio.srcObject = event.stream;
+    };
 }
 
 function createOffer() {
@@ -141,4 +148,32 @@ function sendMessage() {
       console.log("Error! Attempt to send while connection closed.");
       break;
   }
+
+  input.value= "";
+}
+
+const audio = document.querySelector('audio');
+
+const constraints = window.constraints = {
+  audio: true,
+  video: false
+};
+
+function handleSuccess(stream) {
+  const audioTracks = stream.getAudioTracks();
+  console.log('Got stream with constraints:', constraints);
+  console.log('Using audio device: ' + audioTracks[0].label);
+  stream.oninactive = function() {
+    console.log('Stream ended');
+  };
+  window.stream = stream; // make variable available to browser console
+  audio.srcObject = stream;
+  peerConnection.addStream(stream);
+  console.log("added")
+}
+
+function handleError(error) {
+  const errorMessage = 'navigator.MediaDevices.getUserMedia error: ' + error.message + ' ' + error.name;
+ // document.getElementById('errorMsg').innerText = errorMessage;
+  console.log(errorMessage);
 }
